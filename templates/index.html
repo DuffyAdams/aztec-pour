@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aztec Dispenser | SDSU Party Mode</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+    <!-- QR Library -->
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        :root {
+            --sdsu-scarlet: #A6192E;
+            --sdsu-black: #000000;
+            --sdsu-gold: #D4AF37;
+            --bg: #000000;
+            --card: #111111;
+            --text: #ffffff;
+            --success: #22c55e;
+            --error: #ff4444;
+            --warning: #f59e0b;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            background-image: radial-gradient(circle at 50% -20%, #A6192E33, transparent);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            display: grid;
+            gap: 24px;
+        }
+
+        .header-logo {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .header-logo h1 {
+            font-size: 3rem;
+            font-weight: 900;
+            margin: 0;
+            letter-spacing: -2px;
+            text-transform: uppercase;
+            background: linear-gradient(to bottom, #ffffff, #A6192E);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 10px rgba(166, 25, 46, 0.5));
+        }
+
+        .card {
+            background-color: var(--card);
+            padding: 28px;
+            border-radius: 24px;
+            border: 1px solid rgba(166, 25, 46, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, var(--sdsu-scarlet), transparent);
+        }
+
+        h2 {
+            margin-top: 0;
+            font-size: 1.5rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            color: var(--sdsu-scarlet);
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+        }
+
+        /* Status Section */
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .status-item {
+            padding: 16px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .status-item:hover {
+            transform: translateY(-2px);
+            background: rgba(166, 25, 46, 0.05);
+        }
+
+        .status-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            opacity: 0.5;
+            margin-bottom: 6px;
+            letter-spacing: 1px;
+        }
+
+        .status-value {
+            font-weight: 900;
+            font-size: 1.2rem;
+        }
+
+        .online {
+            color: var(--success);
+            text-shadow: 0 0 10px rgba(34, 197, 94, 0.3);
+        }
+
+        .offline {
+            color: var(--error);
+            text-shadow: 0 0 10px rgba(255, 68, 68, 0.3);
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .input-with-action {
+            display: flex;
+            gap: 10px;
+        }
+
+        .amount-selector {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .amount-btn {
+            padding: 16px;
+            border-radius: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            background: transparent;
+            color: white;
+            font-weight: 900;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .amount-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .amount-btn.active {
+            background: var(--sdsu-scarlet);
+            border-color: var(--sdsu-scarlet);
+            box-shadow: 0 0 20px rgba(166, 25, 46, 0.4);
+            transform: scale(1.05);
+        }
+
+        input {
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--sdsu-scarlet);
+            box-shadow: 0 0 15px rgba(166, 25, 46, 0.2);
+        }
+
+        .scan-btn {
+            background: var(--sdsu-scarlet);
+            border: none;
+            border-radius: 12px;
+            padding: 0 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .scan-btn:hover {
+            filter: brightness(1.2);
+            transform: scale(1.05);
+        }
+
+        .dispense-btn {
+            background: linear-gradient(135deg, #A6192E, #7a1222);
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 900;
+            padding: 24px;
+            border-radius: 16px;
+            border: none;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 10px 20px rgba(166, 25, 46, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .dispense-btn:hover:not(:disabled) {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 30px rgba(166, 25, 46, 0.5);
+            filter: brightness(1.1);
+        }
+
+        .dispense-btn:active:not(:disabled) {
+            transform: translateY(-2px);
+        }
+
+        .dispense-btn:disabled {
+            opacity: 0.2;
+            cursor: not-allowed;
+            filter: grayscale(1);
+        }
+
+        /* QR Scanner Preview */
+        #qr-reader-container {
+            display: none;
+            margin-top: 15px;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 2px solid var(--sdsu-scarlet);
+        }
+
+        #qr-reader {
+            width: 100%;
+        }
+
+        /* Activity Logs */
+        .log-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .log-entry {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 10px;
+            font-size: 0.9rem;
+        }
+
+        .status-pill {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+
+        .pill-started {
+            background: rgba(166, 25, 46, 0.2);
+            color: var(--sdsu-scarlet);
+        }
+
+        .pill-success {
+            background: rgba(34, 197, 94, 0.2);
+            color: var(--success);
+        }
+
+        .pill-failed {
+            background: rgba(255, 68, 68, 0.2);
+            color: var(--error);
+        }
+
+        #error-msg {
+            color: var(--error);
+            background: rgba(255, 68, 68, 0.1);
+            padding: 14px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-weight: 700;
+            display: none;
+            border: 1px solid rgba(255, 68, 68, 0.2);
+            text-align: center;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--sdsu-scarlet);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header-logo">
+        <h1>Aztec Pour</h1>
+    </div>
+
+    <div class="container">
+        <!-- Status Card -->
+        <div class="card">
+            <h2>System Intel</h2>
+            <div class="status-grid">
+                <div class="status-item">
+                    <div class="status-label">ESP32 Connection</div>
+                    <div id="esp-connection" class="status-value offline">OFFLINE</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">Glass Detected</div>
+                    <div id="glass-status" class="status-value">NO</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">Machine State</div>
+                    <div id="sys-state" class="status-value">IDLE</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">Last Ping</div>
+                    <div id="heartbeat" class="status-value">-</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls Card -->
+        <div class="card">
+            <div id="error-msg"></div>
+            <div class="controls">
+                <div class="input-section">
+                    <label class="status-label">Who's Pouring?</label>
+                    <div class="input-with-action">
+                        <input type="text" id="user-token" placeholder="SCAN ID OR TYPE..." autocomplete="off">
+                        <button class="scan-btn" onclick="toggleScanner()" id="scanner-btn"
+                            title="Toggle Camera Scanner">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                                <path
+                                    d="M4 4h6v2H6v4H4V4zm10 0h6v6h-2V6h-4V4zM4 14h2v4h4v2H4v-6zm16 0v6h-6v-2h4v-4h2zM7 7h4v4H7V7zm6 0h4v4h-4V7zm0 6h4v4h-4v-4zm-6 0h4v4H7v-4z" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div id="qr-reader-container">
+                        <div id="qr-reader"></div>
+                        <button class="amount-btn"
+                            style="width: 100%; margin-top: 10px; font-size: 0.8rem; padding: 10px;"
+                            onclick="stopScanner()">CANCEL SCAN</button>
+                    </div>
+                </div>
+
+                <div class="input-section">
+                    <label class="status-label">Select Your Shot</label>
+                    <div class="amount-selector">
+                        <button class="amount-btn" onclick="setAmount(15, this)">SHOT (15ml)</button>
+                        <button class="amount-btn active" onclick="setAmount(30, this)">DOUBLE (30ml)</button>
+                        <button class="amount-btn" onclick="setAmount(45, this)">TRIPLE (45ml)</button>
+                    </div>
+                    <div style="margin-top: 12px;">
+                        <input type="number" id="custom-amount" placeholder="CUSTOM ML..."
+                            oninput="selectedAmount = this.value; clearSelection()">
+                    </div>
+                </div>
+
+                <button id="dispense-btn" class="dispense-btn" onclick="handleDispense()" disabled>POUR IT UP</button>
+            </div>
+        </div>
+
+        <!-- Logs Card -->
+        <div class="card">
+            <h2>Recent Activity</h2>
+            <div class="log-list" id="log-list">
+                <!-- Logs will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedAmount = 30;
+        let isSystemReady = false;
+        let glassPresent = false;
+        let currentStatus = 'idle';
+        let espOnline = false;
+        let html5QrCode = null;
+
+        function setAmount(ml, btn) {
+            selectedAmount = ml;
+            document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('custom-amount').value = '';
+            updateDispenseButton();
+        }
+
+        function clearSelection() {
+            document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('active'));
+            updateDispenseButton();
+        }
+
+        async function refreshStatus() {
+            try {
+                const response = await fetch('/api/status');
+                const data = await response.json();
+
+                espOnline = data.esp_online;
+                const espConn = document.getElementById('esp-connection');
+                espConn.innerText = espOnline ? 'ONLINE' : 'OFFLINE';
+                espConn.className = 'status-value ' + (espOnline ? 'online' : 'offline');
+
+                glassPresent = data.esp_status.glass_present;
+                const glassEl = document.getElementById('glass-status');
+                glassEl.innerText = glassPresent ? 'YES' : 'NO';
+                glassEl.className = 'status-value ' + (glassPresent ? 'online' : 'offline');
+
+                currentStatus = data.esp_status.state;
+                document.getElementById('sys-state').innerText = currentStatus.toUpperCase();
+
+                document.getElementById('heartbeat').innerText = new Date(data.timestamp * 1000).toLocaleTimeString();
+
+                isSystemReady = espOnline && currentStatus === 'idle';
+                updateDispenseButton();
+
+            } catch (err) {
+                console.error("Status check failed", err);
+            }
+        }
+
+        async function refreshLogs() {
+            try {
+                const response = await fetch('/api/logs?limit=8');
+                const logs = await response.json();
+                const list = document.getElementById('log-list');
+                list.innerHTML = logs.map(log => `
+                    <div class="log-entry">
+                        <div>
+                            <span style="opacity: 0.5; font-size: 0.8rem;">${new Date(log.timestamp).toLocaleTimeString()}</span>
+                            <span style="margin-left: 10px; font-weight: 700;">${log.user_token}</span>
+                            <span style="margin-left: 10px; color: var(--sdsu-scarlet); font-weight: 900;">${log.amount_ml}ML</span>
+                        </div>
+                        <span class="status-pill pill-${log.status}">${log.status}</span>
+                    </div>
+                `).join('');
+            } catch (err) {
+                console.error("Log fetch failed", err);
+            }
+        }
+
+        function updateDispenseButton() {
+            const btn = document.getElementById('dispense-btn');
+            const canDispense = isSystemReady && glassPresent;
+            btn.disabled = !canDispense;
+
+            if (!espOnline) btn.innerText = "MACHINE OFFLINE";
+            else if (!glassPresent) btn.innerText = "PLACE GLASS";
+            else if (currentStatus !== 'idle') btn.innerText = "FLOWING...";
+            else btn.innerText = "POUR IT UP";
+        }
+
+        async function handleDispense() {
+            const tokenInput = document.getElementById('user-token');
+            const token = tokenInput.value || 'GUEST';
+            const errorEl = document.getElementById('error-msg');
+            errorEl.style.display = 'none';
+
+            try {
+                const response = await fetch('/api/dispense', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        amount_ml: parseInt(selectedAmount),
+                        user_token: token
+                    })
+                });
+                const result = await response.json();
+
+                if (!result.success) {
+                    errorEl.innerText = "BUZZER: " + result.reason.toUpperCase();
+                    errorEl.style.display = 'block';
+                } else {
+                    tokenInput.value = '';
+                    refreshLogs();
+                }
+            } catch (err) {
+                errorEl.innerText = "COMM ERROR: CHECK WIFI";
+                errorEl.style.display = 'block';
+            }
+        }
+
+        // QR Scanner Logic
+        async function toggleScanner() {
+            const container = document.getElementById('qr-reader-container');
+            if (container.style.display === 'block') {
+                stopScanner();
+            } else {
+                startScanner();
+            }
+        }
+
+        async function startScanner() {
+            document.getElementById('qr-reader-container').style.display = 'block';
+            html5QrCode = new Html5Qrcode("qr-reader");
+            const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+
+            try {
+                await html5QrCode.start(
+                    { facingMode: "environment" },
+                    config,
+                    (decodedText) => {
+                        document.getElementById('user-token').value = decodedText;
+                        stopScanner();
+                        // Auto-dispense if ready
+                        if (!document.getElementById('dispense-btn').disabled) {
+                            handleDispense();
+                        }
+                    },
+                    (errorMessage) => { /* Ignore constant scan failures */ }
+                );
+            } catch (err) {
+                console.error("Scanner error", err);
+                document.getElementById('error-msg').innerText = "CAMERA ACCESS DENIED";
+                document.getElementById('error-msg').style.display = 'block';
+                stopScanner();
+            }
+        }
+
+        async function stopScanner() {
+            if (html5QrCode) {
+                await html5QrCode.stop().catch(e => console.error(e));
+                html5QrCode = null;
+            }
+            document.getElementById('qr-reader-container').style.display = 'none';
+        }
+
+        document.getElementById('user-token').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                if (!document.getElementById('dispense-btn').disabled) {
+                    handleDispense();
+                }
+            }
+        });
+
+        setInterval(refreshStatus, 1000);
+        setInterval(refreshLogs, 5000);
+        refreshStatus();
+        refreshLogs();
+    </script>
+</body>
+
+</html>
