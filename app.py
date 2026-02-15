@@ -3,7 +3,7 @@ import requests
 import time
 from database import init_db, log_event, get_logs
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='.')
 
 # ESP32 Configuration
 ESP32_URL = "http://esp32.local"  # Update this as needed

@@ -54,8 +54,23 @@
             text-transform: uppercase;
             background: linear-gradient(to bottom, #ffffff, #A6192E);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
             filter: drop-shadow(0 0 10px rgba(166, 25, 46, 0.5));
+        }
+
+        @media (max-width: 480px) {
+            .header-logo h1 {
+                font-size: 2.22rem;
+            }
+
+            .container {
+                gap: 16px;
+            }
+
+            .card {
+                padding: 20px;
+            }
         }
 
         .card {
@@ -161,6 +176,17 @@
             font-size: 1.1rem;
             cursor: pointer;
             transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            touch-action: manipulation;
+        }
+
+        @media (max-width: 400px) {
+            .amount-selector {
+                grid-template-columns: 1fr;
+            }
+
+            .amount-btn {
+                padding: 12px;
+            }
         }
 
         .amount-btn:hover {
@@ -185,13 +211,42 @@
             font-family: 'Outfit', sans-serif;
             font-size: 1rem;
             font-weight: 700;
-            transition: border-color 0.3s;
+            transition: all 0.3s;
         }
 
         input:focus {
             outline: none;
             border-color: var(--sdsu-scarlet);
             box-shadow: 0 0 15px rgba(166, 25, 46, 0.2);
+            background: rgba(166, 25, 46, 0.05);
+        }
+
+        /* Hide number input spinners */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            appearance: none;
+            margin: 0;
+        }
+
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        .custom-amount-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .unit-tag {
+            position: absolute;
+            right: 16px;
+            font-weight: 900;
+            color: var(--sdsu-scarlet);
+            font-size: 0.8rem;
+            pointer-events: none;
+            opacity: 0.7;
         }
 
         .scan-btn {
@@ -379,13 +434,16 @@
                 <div class="input-section">
                     <label class="status-label">Select Your Shot</label>
                     <div class="amount-selector">
-                        <button class="amount-btn" onclick="setAmount(15, this)">SHOT (15ml)</button>
-                        <button class="amount-btn active" onclick="setAmount(30, this)">DOUBLE (30ml)</button>
-                        <button class="amount-btn" onclick="setAmount(45, this)">TRIPLE (45ml)</button>
+                        <button class="amount-btn" onclick="setAmount(15, this)">SHOT (15ML)</button>
+                        <button class="amount-btn active" onclick="setAmount(30, this)">DOUBLE (30ML)</button>
+                        <button class="amount-btn" onclick="setAmount(45, this)">TRIPLE (45ML)</button>
                     </div>
                     <div style="margin-top: 12px;">
-                        <input type="number" id="custom-amount" placeholder="CUSTOM ML..."
-                            oninput="selectedAmount = this.value; clearSelection()">
+                        <div class="custom-amount-wrapper">
+                            <input type="number" id="custom-amount" placeholder="OR ENTER CUSTOM..." inputmode="numeric"
+                                pattern="[0-9]*" min="1" max="60" oninput="handleCustomInput(this)">
+                            <span class="unit-tag">ML</span>
+                        </div>
                     </div>
                 </div>
 
@@ -414,7 +472,19 @@
             selectedAmount = ml;
             document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            document.getElementById('custom-amount').value = '';
+            const customInput = document.getElementById('custom-amount');
+            customInput.value = '';
+            updateDispenseButton();
+        }
+
+        function handleCustomInput(el) {
+            const val = parseInt(el.value);
+            if (!isNaN(val)) {
+                selectedAmount = val;
+            } else {
+                selectedAmount = 0;
+            }
+            document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('active'));
             updateDispenseButton();
         }
 
@@ -473,12 +543,14 @@
 
         function updateDispenseButton() {
             const btn = document.getElementById('dispense-btn');
-            const canDispense = isSystemReady && glassPresent;
+            const amountValid = !isNaN(selectedAmount) && selectedAmount > 0 && selectedAmount <= 60;
+            const canDispense = isSystemReady && glassPresent && amountValid;
             btn.disabled = !canDispense;
 
             if (!espOnline) btn.innerText = "MACHINE OFFLINE";
             else if (!glassPresent) btn.innerText = "PLACE GLASS";
             else if (currentStatus !== 'idle') btn.innerText = "FLOWING...";
+            else if (!amountValid) btn.innerText = "SET AMOUNT";
             else btn.innerText = "POUR IT UP";
         }
 
