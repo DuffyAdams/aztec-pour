@@ -27,11 +27,12 @@
 ## Project Structure
 ```text
 aztec-pour/
-├── app.py             # Flask application & API controller
+├── app.py             # Flask application factory
+├── routes.py          # API blueprint, route handlers & response helpers
+├── esp32.py           # ESP32 hardware communication layer
 ├── database.py        # SQLite schema and data access layer
 ├── index.html         # Unified frontend application
-├── dispenser.db       # Persistent SQLite storage
-└── README_TECHNICAL.md # This documentation
+└── README.md          # This documentation
 ```
 
 ---
@@ -72,16 +73,17 @@ CREATE TABLE events (
 
 ## Setup & Installation
 
+### Prerequisites
+- **Python 3.13+**
+- **[uv](https://docs.astral.sh/uv/getting-started/installation/)** — Python package manager
+
 ### 1. Backend Setup
 ```bash
-# Install dependencies
-pip install flask requests
+# Install dependencies (automatically creates a .venv)
+uv sync
 
-# Initialize database
-python database.py
-
-# Launch server
-python app.py
+# Launch server (database is initialized automatically)
+uv run flask run --host 0.0.0.0 --port 5000
 ```
 *Note: Ensure `ESP32_URL` in `app.py` matches your hardware's local IP or mDNS name.*
 
