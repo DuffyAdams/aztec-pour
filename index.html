@@ -5,26 +5,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aztec Dispenser | SDSU Party Mode</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;900&display=swap" rel="stylesheet">
     <!-- QR Library -->
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
         :root {
             --sdsu-scarlet: #A6192E;
-            --sdsu-black: #000000;
+            --sdsu-scarlet-glow: rgba(166, 25, 46, 0.8);
+            --rave-red: #ff0000;
+            --neon-red: #ff3131;
+            --sdsu-black: #050505;
             --sdsu-gold: #D4AF37;
             --bg: #000000;
-            --card: #111111;
+            --card-bg: rgba(10, 10, 10, 0.7);
             --text: #ffffff;
+            --text-muted: rgba(255, 255, 255, 0.6);
             --success: #22c55e;
+            --success-glow: rgba(34, 197, 94, 0.5);
             --error: #ff4444;
-            --warning: #f59e0b;
+            --error-glow: rgba(255, 68, 68, 0.5);
+            --border: rgba(255, 255, 255, 0.1);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        * {
+            box-sizing: border-box;
         }
 
         body {
             font-family: 'Outfit', sans-serif;
             background-color: var(--bg);
-            background-image: radial-gradient(circle at 50% -20%, #A6192E33, transparent);
             color: var(--text);
             margin: 0;
             padding: 20px;
@@ -32,56 +42,134 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Dynamic Background Animation */
+        .bg-blob {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(100px);
+            z-index: -1;
+            opacity: 0.5;
+            animation: rave-float 6s infinite alternate ease-in-out;
+        }
+
+        .blob-1 {
+            top: -15%;
+            left: -15%;
+            width: 70vw;
+            height: 70vw;
+            background: radial-gradient(circle, var(--rave-red), var(--sdsu-scarlet));
+        }
+
+        .blob-2 {
+            bottom: -15%;
+            right: -15%;
+            width: 80vw;
+            height: 80vw;
+            background: radial-gradient(circle, #801122, #300000);
+            animation-delay: -3s;
+        }
+
+        @keyframes rave-float {
+            0% {
+                transform: translate(0, 0) scale(1) rotate(0deg);
+                opacity: 0.4;
+            }
+
+            33% {
+                transform: translate(50px, -20px) scale(1.1) rotate(10deg);
+                opacity: 0.6;
+            }
+
+            66% {
+                transform: translate(-30px, 40px) scale(0.9) rotate(-10deg);
+                opacity: 0.5;
+            }
+
+            100% {
+                transform: translate(40px, 60px) scale(1.2) rotate(5deg);
+                opacity: 0.7;
+            }
         }
 
         .container {
             width: 100%;
             max-width: 600px;
             display: grid;
-            gap: 24px;
+            gap: 20px;
+            z-index: 1;
         }
 
+        /* Header */
         .header-logo {
             text-align: center;
             margin-bottom: 10px;
+            position: relative;
         }
 
         .header-logo h1 {
-            font-size: 3rem;
+            font-size: 3.5rem;
             font-weight: 900;
             margin: 0;
-            letter-spacing: -2px;
+            padding: 10px 20px;
+            line-height: 1.1;
+            letter-spacing: -3px;
             text-transform: uppercase;
-            background: linear-gradient(to bottom, #ffffff, #A6192E);
+            background: linear-gradient(135deg, #ffffff 20%, #ff3131 50%, #ffffff 80%);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 10px rgba(166, 25, 46, 0.5));
+            filter: drop-shadow(0 0 8px rgba(255, 49, 49, 0.4));
+            animation: rave-shine 8s linear infinite, glow-pulse 5s infinite ease-in-out;
+            background-size: 200% auto;
+            position: relative;
+            display: inline-block;
+        }
+
+        @keyframes rave-shine {
+            to {
+                background-position: 200% center;
+            }
+        }
+
+        @keyframes glow-pulse {
+
+            0%,
+            100% {
+                filter: drop-shadow(0 0 8px rgba(255, 49, 49, 0.4));
+                transform: scale(1);
+            }
+
+            50% {
+                filter: drop-shadow(0 0 15px rgba(255, 49, 49, 0.6));
+                transform: scale(1.01);
+            }
         }
 
         @media (max-width: 480px) {
             .header-logo h1 {
-                font-size: 2.22rem;
+                font-size: 2.5rem;
             }
 
             .container {
                 gap: 16px;
             }
-
-            .card {
-                padding: 20px;
-            }
         }
 
+        /* Card Styles */
         .card {
-            background-color: var(--card);
-            padding: 28px;
-            border-radius: 24px;
-            border: 1px solid rgba(166, 25, 46, 0.3);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(10px);
+            background: var(--card-bg);
+            padding: 24px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             position: relative;
             overflow: hidden;
+            transition: var(--transition);
         }
 
         .card::before {
@@ -89,248 +177,389 @@
             position: absolute;
             top: 0;
             left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, transparent, var(--sdsu-scarlet), transparent);
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--neon-red), transparent);
+            opacity: 0.8;
+            animation: scanline 3s linear infinite;
+        }
+
+        @keyframes scanline {
+            0% {
+                transform: translateX(-100%);
+            }
+
+            100% {
+                transform: translateX(100%);
+            }
+        }
+
+        .card:hover {
+            border-color: rgba(255, 49, 49, 0.4);
+            box-shadow: 0 12px 40px rgba(255, 49, 49, 0.2);
+            transform: translateY(-2px);
         }
 
         h2 {
             margin-top: 0;
-            font-size: 1.5rem;
-            font-weight: 900;
+            font-size: 1.1rem;
+            font-weight: 700;
             text-transform: uppercase;
-            color: var(--sdsu-scarlet);
-            letter-spacing: 1px;
-            margin-bottom: 20px;
+            color: var(--text-muted);
+            letter-spacing: 2px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        /* Status Section */
+        h2::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--sdsu-scarlet);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--sdsu-scarlet);
+        }
+
+        /* Status Grid */
         .status-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
         }
 
         .status-item {
-            padding: 16px;
-            border-radius: 16px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            transition: transform 0.3s ease;
+            padding: 12px;
+            border-radius: 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
         }
 
-        .status-item:hover {
-            transform: translateY(-2px);
-            background: rgba(166, 25, 46, 0.05);
+        .status-indicator {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            position: absolute;
+            top: 12px;
+            right: 12px;
         }
 
         .status-label {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             text-transform: uppercase;
             font-weight: 700;
-            opacity: 0.5;
-            margin-bottom: 6px;
+            opacity: 0.4;
+            margin-bottom: 4px;
             letter-spacing: 1px;
+            padding-right: 10px;
         }
 
         .status-value {
-            font-weight: 900;
-            font-size: 1.2rem;
+            font-weight: 700;
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
         }
 
         .online {
             color: var(--success);
-            text-shadow: 0 0 10px rgba(34, 197, 94, 0.3);
+            text-shadow: 0 0 10px var(--success-glow);
+        }
+
+        .online-indicator {
+            background: var(--success);
+            box-shadow: 0 0 8px var(--success);
+            animation: pulse-green 2s infinite;
         }
 
         .offline {
             color: var(--error);
-            text-shadow: 0 0 10px rgba(255, 68, 68, 0.3);
+            text-shadow: 0 0 10px var(--error-glow);
+        }
+
+        .offline-indicator {
+            background: var(--error);
+            box-shadow: 0 0 8px var(--error);
+        }
+
+        @keyframes pulse-green {
+            0% {
+                box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 6px rgba(34, 197, 94, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+            }
         }
 
         /* Controls */
-        .controls {
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
+        .input-section {
+            margin-bottom: 24px;
         }
 
-        .input-with-action {
-            display: flex;
-            gap: 10px;
+        .label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        .amount-selector {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-        }
-
-        .amount-btn {
-            padding: 16px;
-            border-radius: 12px;
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            background: transparent;
-            color: white;
-            font-weight: 900;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            touch-action: manipulation;
-        }
-
-        @media (max-width: 400px) {
-            .amount-selector {
-                grid-template-columns: 1fr;
-            }
-
-            .amount-btn {
-                padding: 12px;
-            }
-        }
-
-        .amount-btn:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: rgba(255, 255, 255, 0.3);
-        }
-
-        .amount-btn.active {
-            background: var(--sdsu-scarlet);
-            border-color: var(--sdsu-scarlet);
-            box-shadow: 0 0 20px rgba(166, 25, 46, 0.4);
-            transform: scale(1.05);
+        .input-wrapper {
+            position: relative;
         }
 
         input {
             width: 100%;
-            padding: 16px;
+            padding: 16px 16px 16px 16px;
             border-radius: 12px;
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid var(--border);
+            background: rgba(0, 0, 0, 0.4);
             color: white;
             font-family: 'Outfit', sans-serif;
             font-size: 1rem;
-            font-weight: 700;
-            transition: all 0.3s;
+            font-weight: 500;
+            transition: var(--transition);
         }
 
         input:focus {
             outline: none;
             border-color: var(--sdsu-scarlet);
-            box-shadow: 0 0 15px rgba(166, 25, 46, 0.2);
             background: rgba(166, 25, 46, 0.05);
+            box-shadow: 0 0 0 4px rgba(166, 25, 46, 0.15);
         }
 
-        /* Hide number input spinners */
-        input::-webkit-outer-spin-button,
-        input::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            appearance: none;
-            margin: 0;
-        }
-
-        input[type=number] {
-            -moz-appearance: textfield;
-        }
-
-        .custom-amount-wrapper {
-            position: relative;
+        .scan-btn {
+            position: absolute;
+            right: 6px;
+            top: 6px;
+            bottom: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 8px;
+            width: 44px;
             display: flex;
             align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .scan-btn:hover {
+            background: var(--sdsu-scarlet);
+            transform: scale(1.05);
+        }
+
+        /* Amount Selector */
+        .amount-selector {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .amount-btn {
+            padding: 14px;
+            border-radius: 12px;
+            border: 2px solid var(--border);
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text-muted);
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .amount-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .amount-btn.active {
+            background: var(--sdsu-scarlet);
+            border-color: var(--sdsu-scarlet);
+            color: white;
+            box-shadow: 0 4px 15px var(--sdsu-scarlet-glow);
+            transform: translateY(-2px);
+        }
+
+        /* Custom Amount Input with Liquid Effect */
+        .custom-amount-wrapper {
+            position: relative;
+            margin-top: 12px;
         }
 
         .unit-tag {
             position: absolute;
             right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
             font-weight: 900;
-            color: var(--sdsu-scarlet);
+            color: var(--sdsu-gold);
             font-size: 0.8rem;
             pointer-events: none;
-            opacity: 0.7;
+            opacity: 0.8;
         }
 
-        .scan-btn {
-            background: var(--sdsu-scarlet);
-            border: none;
-            border-radius: 12px;
-            padding: 0 20px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-
-        .scan-btn:hover {
-            filter: brightness(1.2);
-            transform: scale(1.05);
-        }
-
+        /* Main Dispense Button */
         .dispense-btn {
-            background: linear-gradient(135deg, #A6192E, #7a1222);
+            background: linear-gradient(135deg, var(--sdsu-scarlet), #801122);
             color: white;
-            font-size: 1.5rem;
+            font-size: 1.25rem;
             font-weight: 900;
-            padding: 24px;
+            padding: 20px;
             border-radius: 16px;
             border: none;
             cursor: pointer;
             text-transform: uppercase;
             letter-spacing: 2px;
-            box-shadow: 0 10px 20px rgba(166, 25, 46, 0.3);
-            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(166, 25, 46, 0.4);
+            transition: var(--transition);
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+            animation: button-glow 6s infinite ease-in-out;
+        }
+
+        @keyframes button-glow {
+
+            0%,
+            100% {
+                box-shadow: 0 4px 15px rgba(166, 25, 46, 0.4);
+                transform: translateY(0) scale(1);
+            }
+
+            50% {
+                box-shadow: 0 8px 25px rgba(255, 49, 49, 0.3);
+                transform: translateY(-1px) scale(1.005);
+            }
+        }
+
+        .dispense-btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: 0.5s;
         }
 
         .dispense-btn:hover:not(:disabled) {
-            transform: translateY(-4px);
-            box-shadow: 0 15px 30px rgba(166, 25, 46, 0.5);
-            filter: brightness(1.1);
+            transform: translateY(-1px) scale(1.01);
+            box-shadow: 0 8px 25px rgba(166, 25, 46, 0.5);
+        }
+
+        .dispense-btn:hover:not(:disabled)::after {
+            left: 100%;
+            transition: 0.7s;
         }
 
         .dispense-btn:active:not(:disabled) {
-            transform: translateY(-2px);
+            transform: translateY(1px) scale(0.99);
         }
 
         .dispense-btn:disabled {
-            opacity: 0.2;
+            background: #1a1a1a;
+            color: #444;
+            box-shadow: none;
             cursor: not-allowed;
-            filter: grayscale(1);
+            transform: none;
+            border: 1px solid #333;
         }
 
-        /* QR Scanner Preview */
+        /* QR Scanner Area */
         #qr-reader-container {
             display: none;
-            margin-top: 15px;
+            margin-top: 16px;
             border-radius: 16px;
             overflow: hidden;
             border: 2px solid var(--sdsu-scarlet);
+            position: relative;
+            background: #000;
         }
 
-        #qr-reader {
-            width: 100%;
+        #qr-reader-container::before {
+            content: 'SCANNING...';
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--sdsu-scarlet);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 900;
+            z-index: 10;
+            letter-spacing: 1px;
+            box-shadow: 0 0 10px var(--sdsu-scarlet-glow);
         }
 
-        /* Activity Logs */
+        /* Logs */
         .log-list {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        /* Scrollbar Styling */
+        .log-list::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .log-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .log-list::-webkit-scrollbar-thumb {
+            background: var(--sdsu-scarlet);
+            border-radius: 4px;
         }
 
         .log-entry {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 16px;
-            background: rgba(255, 255, 255, 0.02);
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.03);
             border-radius: 10px;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+            border-left: 2px solid transparent;
+            animation: slideIn 0.4s ease forwards;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
 
         .status-pill {
             padding: 4px 8px;
             border-radius: 6px;
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             font-weight: 900;
             text-transform: uppercase;
         }
@@ -338,49 +567,352 @@
         .pill-started {
             background: rgba(166, 25, 46, 0.2);
             color: var(--sdsu-scarlet);
+            border: 1px solid rgba(166, 25, 46, 0.3);
         }
 
         .pill-success {
             background: rgba(34, 197, 94, 0.2);
             color: var(--success);
+            border: 1px solid rgba(34, 197, 94, 0.3);
         }
 
         .pill-failed {
             background: rgba(255, 68, 68, 0.2);
             color: var(--error);
+            border: 1px solid rgba(255, 68, 68, 0.3);
         }
 
+        /* Error Message */
         #error-msg {
-            color: var(--error);
+            color: #ffcccc;
             background: rgba(255, 68, 68, 0.1);
             padding: 14px;
             border-radius: 12px;
             margin-bottom: 20px;
             font-weight: 700;
             display: none;
-            border: 1px solid rgba(255, 68, 68, 0.2);
+            border: 1px solid rgba(255, 68, 68, 0.3);
             text-align: center;
+            backdrop-filter: blur(5px);
+            animation: shake 0.5s ease-in-out;
         }
 
-        ::-webkit-scrollbar {
-            width: 8px;
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-5px);
+            }
+
+            75% {
+                transform: translateX(5px);
+            }
         }
 
-        ::-webkit-scrollbar-track {
-            background: var(--bg);
+        /* Utility */
+        .hidden {
+            display: none !important;
         }
 
-        ::-webkit-scrollbar-thumb {
-            background: var(--sdsu-scarlet);
-            border-radius: 10px;
+        .text-gold {
+            color: var(--sdsu-gold);
+        }
+
+        /* Rave Mode Specifics */
+        .rave-mode {
+            background-color: #050000;
+        }
+
+        .rave-mode .bg-blob {
+            filter: blur(60px);
+            opacity: 0.8;
+            animation-duration: 2s;
+        }
+
+        .rave-mode .card {
+            border-color: var(--neon-red);
+            box-shadow: 0 0 20px rgba(255, 49, 49, 0.4);
+            animation: strobe 0.2s infinite alternate;
+        }
+
+        @keyframes strobe {
+            0% {
+                border-color: var(--neon-red);
+            }
+
+            100% {
+                border-color: var(--sdsu-gold);
+            }
+        }
+
+        .rave-mode .header-logo h1 {
+            animation: rave-shine 3s linear infinite, glow-pulse 2s infinite ease-in-out;
+        }
+
+        .rave-mode .shot-glass-3d {
+            animation: glass-dance 1s infinite ease-in-out;
+        }
+
+        .rave-mode .glass-liquid {
+            animation: liquid-swish 0.5s infinite alternate ease-in-out;
+            box-shadow: 0 0 30px var(--neon-red);
+        }
+
+        /* Scanline Overlay */
+        body::after {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%),
+                linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            background-size: 100% 4px, 3px 100%;
+            z-index: 100;
+            pointer-events: none;
+            opacity: 0.3;
+        }
+
+        .rave-mode::after {
+            opacity: 0.6;
+            animation: noise 0.2s infinite steps(2);
+        }
+
+        @keyframes noise {
+            0% {
+                transform: translateY(0);
+            }
+
+            100% {
+                transform: translateY(2px);
+            }
+        }
+
+        /* Number input spinners */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        /* 3D Shot Glass */
+        .header-main {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 25px;
+            margin-bottom: 5px;
+            perspective: 1200px;
+            z-index: 10;
+            position: relative;
+        }
+
+        .shot-glass-3d-wrap {
+            width: 70px;
+            height: 100px;
+            position: relative;
+            cursor: pointer;
+            filter: drop-shadow(0 0 15px var(--sdsu-scarlet-glow));
+            transition: var(--transition);
+        }
+
+        .shot-glass-3d-wrap:hover {
+            transform: scale(1.15) rotate(-5deg);
+            filter: drop-shadow(0 0 25px var(--neon-red));
+        }
+
+        .shot-glass-3d-wrap::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 10px;
+            background: radial-gradient(ellipse at center, rgba(166, 25, 46, 0.4) 0%, transparent 70%);
+            z-index: -1;
+        }
+
+        .shot-glass-3d {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            animation: glass-dance 5s infinite ease-in-out;
+            transform: rotateX(-15deg) rotateY(20deg);
+        }
+
+        @keyframes glass-dance {
+
+            0%,
+            100% {
+                transform: rotateX(-15deg) rotateY(15deg) translateY(0);
+            }
+
+            50% {
+                transform: rotateX(-10deg) rotateY(-15deg) translateY(-12px);
+            }
+        }
+
+        .glass-body {
+            position: absolute;
+            top: 15%;
+            left: 15%;
+            width: 70%;
+            height: 70%;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.05));
+            border: 1.5px solid rgba(255, 255, 255, 0.4);
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
+            backdrop-filter: blur(8px);
+            box-shadow: inset 0 0 15px rgba(255, 255, 255, 0.2),
+                0 0 20px rgba(166, 25, 46, 0.1);
+            overflow: hidden;
+        }
+
+        .glass-body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 15%;
+            width: 3px;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0.5), transparent);
+            filter: blur(1px);
+        }
+
+        .glass-rim {
+            position: absolute;
+            top: 10%;
+            left: 10%;
+            width: 80%;
+            height: 14px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1.5px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            transform: rotateX(25deg);
+            z-index: 5;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .glass-liquid {
+            position: absolute;
+            bottom: 3px;
+            left: 3px;
+            right: 3px;
+            height: 60%;
+            background: linear-gradient(to top, var(--sdsu-scarlet), var(--rave-red));
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
+            opacity: 0.9;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.3);
+            animation: liquid-swish 4s infinite alternate ease-in-out;
+            transform-origin: bottom center;
+        }
+
+        .glass-liquid::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            filter: blur(1px);
+        }
+
+        @keyframes liquid-swish {
+            0% {
+                transform: rotate(-2deg) scaleY(1);
+            }
+
+            100% {
+                transform: rotate(2deg) scaleY(1.05);
+            }
+        }
+
+        .glass-base {
+            position: absolute;
+            bottom: 10%;
+            left: 15%;
+            width: 70%;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            transform: rotateX(85deg);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .sparkle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 0 10px white, 0 0 20px white;
+            animation: sparkle-float 3s infinite linear;
+            opacity: 0;
+            z-index: 15;
+        }
+
+        @keyframes sparkle-float {
+            0% {
+                transform: translate(0, 0) scale(0);
+                opacity: 0;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                transform: translate(20px, -40px) scale(1.5);
+                opacity: 0;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header-main {
+                gap: 15px;
+            }
+
+            .shot-glass-3d-wrap {
+                width: 50px;
+                height: 80px;
+            }
         }
     </style>
 </head>
 
 <body>
 
-    <div class="header-logo">
-        <h1>Aztec Pour</h1>
+    <!-- Background Elements -->
+    <div class="bg-blob blob-1"></div>
+    <div class="bg-blob blob-2"></div>
+
+    <div class="header-main">
+        <div class="shot-glass-3d-wrap">
+            <div class="sparkle" style="top: 20%; left: 20%; animation-delay: 0s;"></div>
+            <div class="sparkle" style="top: 40%; left: 70%; animation-delay: 1s;"></div>
+            <div class="sparkle" style="top: 60%; left: 30%; animation-delay: 2s;"></div>
+            <div class="shot-glass-3d">
+                <div class="glass-rim"></div>
+                <div class="glass-body">
+                    <div class="glass-liquid"></div>
+                </div>
+                <div class="glass-base"></div>
+            </div>
+        </div>
+        <div class="header-logo">
+            <h1>Aztec Pour</h1>
+        </div>
     </div>
 
     <div class="container">
@@ -389,10 +921,12 @@
             <h2>System Intel</h2>
             <div class="status-grid">
                 <div class="status-item">
-                    <div class="status-label">ESP32 Connection</div>
+                    <div class="status-indicator" id="esp-indicator"></div>
+                    <div class="status-label">ESP32 Link</div>
                     <div id="esp-connection" class="status-value offline">OFFLINE</div>
                 </div>
                 <div class="status-item">
+                    <div class="status-indicator" id="glass-indicator"></div>
                     <div class="status-label">Glass Detected</div>
                     <div id="glass-status" class="status-value">NO</div>
                 </div>
@@ -402,7 +936,7 @@
                 </div>
                 <div class="status-item">
                     <div class="status-label">Last Ping</div>
-                    <div id="heartbeat" class="status-value">-</div>
+                    <div id="heartbeat" class="status-value text-gold">--:--:--</div>
                 </div>
             </div>
         </div>
@@ -412,55 +946,66 @@
             <div id="error-msg"></div>
             <div class="controls">
                 <div class="input-section">
-                    <label class="status-label">Who's Pouring?</label>
-                    <div class="input-with-action">
-                        <input type="text" id="user-token" placeholder="SCAN ID OR TYPE..." autocomplete="off">
+                    <label class="label">Who's Pouring?</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="user-token" placeholder="SCAN ID OR TYPE NAME..." autocomplete="off">
                         <button class="scan-btn" onclick="toggleScanner()" id="scanner-btn"
                             title="Toggle Camera Scanner">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
-                                <path
-                                    d="M4 4h6v2H6v4H4V4zm10 0h6v6h-2V6h-4V4zM4 14h2v4h4v2H4v-6zm16 0v6h-6v-2h4v-4h2zM7 7h4v4H7V7zm6 0h4v4h-4V7zm0 6h4v4h-4v-4zm-6 0h4v4H7v-4z" />
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 7V5a2 2 0 0 1 2-2h2"></path>
+                                <path d="M17 3h2a2 2 0 0 1 2 2v2"></path>
+                                <path d="M21 17v2a2 2 0 0 1-2 2h-2"></path>
+                                <path d="M7 21H5a2 2 0 0 1-2-2v-2"></path>
+                                <rect x="7" y="7" width="10" height="10" rx="1"></rect>
                             </svg>
                         </button>
                     </div>
                     <div id="qr-reader-container">
                         <div id="qr-reader"></div>
                         <button class="amount-btn"
-                            style="width: 100%; margin-top: 10px; font-size: 0.8rem; padding: 10px;"
-                            onclick="stopScanner()">CANCEL SCAN</button>
+                            style="width: 100%; margin-top: 10px; font-size: 0.75rem; padding: 10px; border-color: var(--error); color: var(--error);"
+                            onclick="stopScanner()">CLOSE SCANNER</button>
                     </div>
                 </div>
 
                 <div class="input-section">
-                    <label class="status-label">Select Your Shot</label>
+                    <label class="label">Select Volume</label>
                     <div class="amount-selector">
-                        <button class="amount-btn" onclick="setAmount(15, this)">SHOT (15ML)</button>
-                        <button class="amount-btn active" onclick="setAmount(30, this)">DOUBLE (30ML)</button>
-                        <button class="amount-btn" onclick="setAmount(45, this)">TRIPLE (45ML)</button>
+                        <button class="amount-btn" onclick="setAmount(15, this)">SHOT <br><span
+                                style="font-size:0.7em; opacity:0.6">15ML</span></button>
+                        <button class="amount-btn active" onclick="setAmount(30, this)">DOUBLE <br><span
+                                style="font-size:0.7em; opacity:0.6">30ML</span></button>
+                        <button class="amount-btn" onclick="setAmount(45, this)">TRIPLE <br><span
+                                style="font-size:0.7em; opacity:0.6">45ML</span></button>
                     </div>
                     <div style="margin-top: 12px;">
                         <div class="custom-amount-wrapper">
-                            <input type="number" id="custom-amount" placeholder="OR ENTER CUSTOM..." inputmode="numeric"
+                            <input type="number" id="custom-amount" placeholder="CUSTOM AMOUNT..." inputmode="numeric"
                                 pattern="[0-9]*" min="1" max="60" oninput="handleCustomInput(this)">
                             <span class="unit-tag">ML</span>
                         </div>
                     </div>
                 </div>
 
-                <button id="dispense-btn" class="dispense-btn" onclick="handleDispense()" disabled>POUR IT UP</button>
+                <button id="dispense-btn" class="dispense-btn" onclick="handleDispense()" disabled>INITIALIZE
+                    POUR</button>
             </div>
         </div>
 
         <!-- Logs Card -->
         <div class="card">
-            <h2>Recent Activity</h2>
+            <h2>Party Logs</h2>
             <div class="log-list" id="log-list">
                 <!-- Logs will be populated here -->
+                <div style="text-align: center; color: var(--text-muted); font-size: 0.8rem; padding: 20px;">Waiting for
+                    activity...</div>
             </div>
         </div>
     </div>
 
     <script>
+        // State Variables
         let selectedAmount = 30;
         let isSystemReady = false;
         let glassPresent = false;
@@ -468,12 +1013,19 @@
         let espOnline = false;
         let html5QrCode = null;
 
+        // --- Interaction Logic ---
+
         function setAmount(ml, btn) {
             selectedAmount = ml;
+            // Remove active class from all buttons
             document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+            // Add to clicked (if it exists)
+            if (btn) btn.classList.add('active');
+
+            // Clear custom input
             const customInput = document.getElementById('custom-amount');
-            customInput.value = '';
+            if (customInput.value) customInput.value = '';
+
             updateDispenseButton();
         }
 
@@ -484,61 +1036,9 @@
             } else {
                 selectedAmount = 0;
             }
+            // Deselect preset buttons
             document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('active'));
             updateDispenseButton();
-        }
-
-        function clearSelection() {
-            document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('active'));
-            updateDispenseButton();
-        }
-
-        async function refreshStatus() {
-            try {
-                const response = await fetch('/api/status');
-                const data = await response.json();
-
-                espOnline = data.esp_online;
-                const espConn = document.getElementById('esp-connection');
-                espConn.innerText = espOnline ? 'ONLINE' : 'OFFLINE';
-                espConn.className = 'status-value ' + (espOnline ? 'online' : 'offline');
-
-                glassPresent = data.esp_status.glass_present;
-                const glassEl = document.getElementById('glass-status');
-                glassEl.innerText = glassPresent ? 'YES' : 'NO';
-                glassEl.className = 'status-value ' + (glassPresent ? 'online' : 'offline');
-
-                currentStatus = data.esp_status.state;
-                document.getElementById('sys-state').innerText = currentStatus.toUpperCase();
-
-                document.getElementById('heartbeat').innerText = new Date(data.timestamp * 1000).toLocaleTimeString();
-
-                isSystemReady = espOnline && currentStatus === 'idle';
-                updateDispenseButton();
-
-            } catch (err) {
-                console.error("Status check failed", err);
-            }
-        }
-
-        async function refreshLogs() {
-            try {
-                const response = await fetch('/api/logs?limit=8');
-                const logs = await response.json();
-                const list = document.getElementById('log-list');
-                list.innerHTML = logs.map(log => `
-                    <div class="log-entry">
-                        <div>
-                            <span style="opacity: 0.5; font-size: 0.8rem;">${new Date(log.timestamp).toLocaleTimeString()}</span>
-                            <span style="margin-left: 10px; font-weight: 700;">${log.user_token}</span>
-                            <span style="margin-left: 10px; color: var(--sdsu-scarlet); font-weight: 900;">${log.amount_ml}ML</span>
-                        </div>
-                        <span class="status-pill pill-${log.status}">${log.status}</span>
-                    </div>
-                `).join('');
-            } catch (err) {
-                console.error("Log fetch failed", err);
-            }
         }
 
         function updateDispenseButton() {
@@ -547,18 +1047,26 @@
             const canDispense = isSystemReady && glassPresent && amountValid;
             btn.disabled = !canDispense;
 
-            if (!espOnline) btn.innerText = "MACHINE OFFLINE";
+            // Button Text Logic
+            if (!espOnline) btn.innerText = "SYSTEM OFFLINE";
             else if (!glassPresent) btn.innerText = "PLACE GLASS";
-            else if (currentStatus !== 'idle') btn.innerText = "FLOWING...";
-            else if (!amountValid) btn.innerText = "SET AMOUNT";
+            else if (currentStatus !== 'idle') btn.innerText = "DISPENSING...";
+            else if (!amountValid) btn.innerText = "INVALID AMOUNT";
             else btn.innerText = "POUR IT UP";
         }
 
         async function handleDispense() {
             const tokenInput = document.getElementById('user-token');
-            const token = tokenInput.value || 'GUEST';
+            const token = tokenInput.value.trim() || 'GUEST';
             const errorEl = document.getElementById('error-msg');
+            const btn = document.getElementById('dispense-btn');
+
             errorEl.style.display = 'none';
+
+            // Visual feedback of sending
+            const originalText = btn.innerText;
+            btn.innerText = "SENDING...";
+            btn.style.opacity = "0.8";
 
             try {
                 const response = await fetch('/api/dispense', {
@@ -571,20 +1079,114 @@
                 });
                 const result = await response.json();
 
+                btn.innerText = originalText;
+                btn.style.opacity = "1";
+
                 if (!result.success) {
                     errorEl.innerText = "BUZZER: " + result.reason.toUpperCase();
                     errorEl.style.display = 'block';
                 } else {
                     tokenInput.value = '';
+                    // Clear custom amount on success
+                    document.getElementById('custom-amount').value = '';
+                    // Reset selection to default (Double)
+                    const doubleBtn = document.querySelector('.amount-btn:nth-child(2)');
+                    setAmount(30, doubleBtn);
                     refreshLogs();
                 }
             } catch (err) {
-                errorEl.innerText = "COMM ERROR: CHECK WIFI";
+                console.error(err);
+                btn.innerText = originalText;
+                btn.style.opacity = "1";
+                errorEl.innerText = "COMM ERROR: CHECK WIFI CONNECTION";
                 errorEl.style.display = 'block';
             }
         }
 
-        // QR Scanner Logic
+        // --- System Status & Logs ---
+
+        async function refreshStatus() {
+            try {
+                const response = await fetch('/api/status');
+                const data = await response.json();
+
+                espOnline = data.esp_online;
+
+                // Update ESP Connection UI
+                const espConn = document.getElementById('esp-connection');
+                const espInd = document.getElementById('esp-indicator');
+
+                espConn.innerText = espOnline ? 'CONNECTED' : 'OFFLINE';
+                espConn.className = 'status-value ' + (espOnline ? 'online' : 'offline');
+                espInd.className = 'status-indicator ' + (espOnline ? 'online-indicator' : 'offline-indicator');
+
+                // Update Glass Status
+                glassPresent = data.esp_status.glass_present;
+                const glassEl = document.getElementById('glass-status');
+                const glassInd = document.getElementById('glass-indicator');
+
+                glassEl.innerText = glassPresent ? 'DETECTED' : 'EMPTY';
+                glassEl.className = 'status-value ' + (glassPresent ? 'online' : 'offline');
+                glassInd.className = 'status-indicator ' + (glassPresent ? 'online-indicator' : 'offline-indicator');
+
+                // Update State
+                currentStatus = data.esp_status.state;
+                const stateEl = document.getElementById('sys-state');
+                stateEl.innerText = currentStatus.toUpperCase();
+
+                // Add specific styling for busy state
+                if (currentStatus !== 'idle') {
+                    stateEl.style.color = 'var(--sdsu-gold)';
+                    document.body.classList.add('rave-mode');
+                } else {
+                    stateEl.style.color = 'var(--text)';
+                    document.body.classList.remove('rave-mode');
+                }
+
+                // Heartbeat
+                if (data.timestamp) {
+                    document.getElementById('heartbeat').innerText = new Date(data.timestamp * 1000).toLocaleTimeString();
+                }
+
+                isSystemReady = espOnline && currentStatus === 'idle';
+                updateDispenseButton();
+
+            } catch (err) {
+                console.error("Status check failed", err);
+                // Optionally set UI to offline state if fetch fails repeatedly
+            }
+        }
+
+        async function refreshLogs() {
+            try {
+                const response = await fetch('/api/logs?limit=8');
+                const logs = await response.json();
+                const list = document.getElementById('log-list');
+
+                if (logs.length === 0) {
+                    list.innerHTML = '<div style="text-align: center; color: var(--text-muted); font-size: 0.8rem; padding: 20px;">Waiting for activity...</div>';
+                    return;
+                }
+
+                list.innerHTML = logs.map((log, index) => `
+                    <div class="log-entry" style="animation-delay: ${index * 50}ms">
+                        <div>
+                            <div style="font-weight: 700; font-size: 0.95rem;">${log.user_token}</div>
+                            <div style="opacity: 0.5; font-size: 0.75rem; margin-top:2px;">
+                                ${new Date(log.timestamp).toLocaleTimeString()} • 
+                                <span style="color: var(--sdsu-scarlet); font-weight: 700;">${log.amount_ml}ML</span>
+                            </div>
+                        </div>
+                        <span class="status-pill pill-${log.status}">${log.status}</span>
+                    </div>
+                `).join('');
+            } catch (err) {
+                console.error("Log fetch failed", err);
+            }
+        }
+
+        // --- QR Code Logic ---
+
         async function toggleScanner() {
             const container = document.getElementById('qr-reader-container');
             if (container.style.display === 'block') {
@@ -596,6 +1198,11 @@
 
         async function startScanner() {
             document.getElementById('qr-reader-container').style.display = 'block';
+
+            // Clear previous instance if exists
+            const qrReaderElement = document.getElementById("qr-reader");
+            qrReaderElement.innerHTML = "";
+
             html5QrCode = new Html5Qrcode("qr-reader");
             const config = { fps: 10, qrbox: { width: 250, height: 250 } };
 
@@ -604,8 +1211,14 @@
                     { facingMode: "environment" },
                     config,
                     (decodedText) => {
+                        // Success
                         document.getElementById('user-token').value = decodedText;
                         stopScanner();
+                        // Flash the input to show success
+                        const input = document.getElementById('user-token');
+                        input.style.borderColor = 'var(--success)';
+                        setTimeout(() => input.style.borderColor = '', 500);
+
                         // Auto-dispense if ready
                         if (!document.getElementById('dispense-btn').disabled) {
                             handleDispense();
@@ -623,12 +1236,17 @@
 
         async function stopScanner() {
             if (html5QrCode) {
-                await html5QrCode.stop().catch(e => console.error(e));
+                try {
+                    await html5QrCode.stop();
+                } catch (e) { console.log("Scanner already stopped"); }
                 html5QrCode = null;
             }
             document.getElementById('qr-reader-container').style.display = 'none';
         }
 
+        // --- Initialization ---
+
+        // Enter key to dispense
         document.getElementById('user-token').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 if (!document.getElementById('dispense-btn').disabled) {
@@ -637,10 +1255,14 @@
             }
         });
 
+        // Polling loops
         setInterval(refreshStatus, 1000);
         setInterval(refreshLogs, 5000);
+
+        // Initial calls
         refreshStatus();
         refreshLogs();
+
     </script>
 </body>
 
