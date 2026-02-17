@@ -958,6 +958,19 @@
 
         async function startScanner() {
             const container = document.getElementById('qr-reader-container');
+
+            // 1. Check for Secure Context (Required for Camera)
+            const isSecure = window.isSecureContext ||
+                window.location.hostname === 'localhost' ||
+                window.location.hostname === '127.0.0.1';
+
+            if (!isSecure) {
+                alert("🔒 Security Error: Camera access requires HTTPS or localhost.\n\n" +
+                    "You are currently using: " + window.location.protocol + "//" + window.location.hostname +
+                    "\n\nPlease use localhost or set up an SSL certificate.");
+                return;
+            }
+
             container.style.display = 'block';
             isScannerOpen = true;
 
@@ -965,28 +978,58 @@
             const qrReaderElement = document.getElementById("qr-reader");
             qrReaderElement.innerHTML = "";
 
-            html5QrCode = new Html5Qrcode("qr-reader");
-            const config = { fps: 10, qrbox: { width: 250, height: 250 } };
-
             try {
-                await html5QrCode.start(
-                    { facingMode: "environment" },
-                    config,
-                    (decodedText) => {
-                        document.getElementById('user-token').value = decodedText;
-                        stopScanner();
-                        // Visual flash
-                        const input = document.getElementById('user-token');
-                        input.style.backgroundColor = 'rgba(48, 209, 88, 0.2)';
-                        setTimeout(() => input.style.backgroundColor = '', 300);
+                html5QrCode = new Html5Qrcode("qr-reader");
+                const config = { fps: 10, qrbox: { width: 250, height: 250 } };
 
-                        updateDispenseButton();
-                    },
-                    () => { } // Ignore scan errors
-                );
+                // Scan Success Callback
+                const onScanSuccess = (decodedText) => {
+                    document.getElementById('user-token').value = decodedText;
+                    stopScanner();
+
+                    // Visual feedback
+                    const input = document.getElementById('user-token');
+                    input.style.backgroundColor = 'rgba(48, 209, 88, 0.2)';
+                    setTimeout(() => input.style.backgroundColor = '', 300);
+
+                    updateDispenseButton();
+                };
+
+                // Attempt to start with environment (back) camera
+                try {
+                    await html5QrCode.start(
+                        { facingMode: "environment" },
+                        config,
+                        onScanSuccess,
+                        () => { } // Ignore scan errors
+                    );
+                } catch (envErr) {
+                    console.warn("Environment camera failed, retrying with default...", envErr);
+                    // Fallback to any available camera (works on desktop/front-cam only devices)
+                    await html5QrCode.start(
+                        { facingMode: "user" },
+                        config,
+                        onScanSuccess,
+                        () => { }
+                    );
+                }
             } catch (err) {
-                console.error("Camera error", err);
-                alert("Could not access camera.");
+                console.error("Camera Access Error:", err);
+
+                let message = "Could not access camera.";
+                const errName = err.name || (typeof err === 'string' ? err : '');
+
+                if (errName.includes('NotAllowedError')) {
+                    message = "Permission Denied: Please allow camera access in your browser settings.";
+                } else if (errName.includes('NotFoundError')) {
+                    message = "No Camera Found: Ensure your camera is connected and not disabled.";
+                } else if (errName.includes('NotReadableError')) {
+                    message = "Camera Busy: Another application might be using the camera.";
+                } else if (errName.includes('InsecureContext')) {
+                    message = "Security Error: Camera requires HTTPS or localhost.";
+                }
+
+                alert(message);
                 stopScanner();
             }
         }
