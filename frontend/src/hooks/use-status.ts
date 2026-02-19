@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { fetchStatus } from "@/lib/api";
-import { POLL_STATUS_MS } from "@/lib/constants";
+import { POLL_STATUS_MS, POLL_STATUS_OFFLINE_MS } from "@/lib/constants";
 import type { SystemStatus } from "@/types/api";
 
 const INITIAL_STATUS: SystemStatus = {
@@ -18,19 +18,23 @@ const INITIAL_STATUS: SystemStatus = {
 };
 
 /**
- * Polls GET /api/status at a fixed interval.
- * Returns the latest status and a manual refresh callback.
+ * Polls GET /api/status with adaptive intervals:
+ * - 2s when ESP32 is online
+ * - 10s when ESP32 is offline
  */
 export function useStatus() {
   const [status, setStatus] = useState<SystemStatus>(INITIAL_STATUS);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  const intervalRef = useRef<ReturnType<typeof setInterval>>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
+  const onlineRef = useRef(false);
 
   const refresh = useCallback(async () => {
     try {
       const data = await fetchStatus();
+      onlineRef.current = data.esp_online;
       setStatus(data);
     } catch {
+      onlineRef.current = false;
       setStatus((prev) => ({
         ...prev,
         esp_online: false,
@@ -42,10 +46,22 @@ export function useStatus() {
   }, []);
 
   useEffect(() => {
-    queueMicrotask(refresh);
-    intervalRef.current = setInterval(refresh, POLL_STATUS_MS);
+    let cancelled = false;
+
+    async function poll() {
+      if (cancelled) return;
+      await refresh();
+      if (!cancelled) {
+        const interval = onlineRef.current ? POLL_STATUS_MS : POLL_STATUS_OFFLINE_MS;
+        timeoutRef.current = setTimeout(poll, interval);
+      }
+    }
+
+    poll();
+
     return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
+      cancelled = true;
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
   }, [refresh]);
 
