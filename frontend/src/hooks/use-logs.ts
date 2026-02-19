@@ -6,9 +6,10 @@ import type { LogEntry } from "@/types/api";
 
 /**
  * Polls GET /api/logs at a fixed interval.
+ * Polling only runs when `enabled` is true.
  * Returns the log entries and a manual refresh callback.
  */
-export function useLogs() {
+export function useLogs(enabled = true) {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const intervalRef = useRef<ReturnType<typeof setInterval>>(null);
 
@@ -22,12 +23,14 @@ export function useLogs() {
   }, []);
 
   useEffect(() => {
+    if (!enabled) return;
+
     queueMicrotask(refresh);
     intervalRef.current = setInterval(refresh, POLL_LOGS_MS);
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [refresh]);
+  }, [refresh, enabled]);
 
   return { logs, refresh } as const;
 }

@@ -10,7 +10,7 @@ import { useDispense } from "@/hooks/use-dispense";
 
 export default function App() {
   const { status, lastUpdated, refresh: refreshStatus } = useStatus();
-  const { logs, refresh: refreshLogs } = useLogs();
+  const { logs, refresh: refreshLogs } = useLogs(status.esp_online);
 
   const handleSuccess = useCallback(() => {
     toast.success("Dispense started");
