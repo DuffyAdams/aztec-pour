@@ -1,4 +1,4 @@
-"""Aztec Pour - Flask application factory."""
+"""Chuggernog - Flask application factory."""
 
 from __future__ import annotations
 
@@ -9,7 +9,6 @@ from routes import api
 
 
 def create_app() -> Flask:
-    """Application factory for the Aztec Pour Flask app."""
     app = Flask(__name__, template_folder=".")
     app.config["DATABASE"] = "dispenser.db"
 

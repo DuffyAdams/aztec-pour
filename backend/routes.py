@@ -1,4 +1,4 @@
-"""API routes for the Aztec Pour application."""
+"""API routes for the Chuggernog app."""
 
 from __future__ import annotations
 
