@@ -1,12 +1,12 @@
-# Juggernog | Technical Documentation
+# Chuggernog | Technical Documentation
 
 ## System Overview
-**Aztec Pour** is a smart drink dispenser control system designed for high-performance party environments (LMAO). It features a distributed architecture where a centralized Python/Flask server coordinates communication between a modern web interface and an ESP32-powered hardware dispenser.
+**Chuggernog** is a smart drink dispenser control system designed for high-performance party environments (LMAO). It features a distributed architecture where a centralized Python/Flask server coordinates communication between a modern web interface and an ESP32-powered hardware dispenser.
 
 ### Core Features
 - **Real-time Monitoring:** Synchronized status updates for glass presence and machine state.
 - **Precision Pouring:** Selectable shot sizes (15ml, 30ml, 45ml) with custom override support.
-- **QR Identity Integration:** Instant user identification via `html5-qrcode` scanning.
+- **QR Identity Integration:** Instant user identification via camera-based QR scanning.
 - **Audit Logging:** Comprehensive SQLite database for tracking every pour and failure event.
 - **Safety Interlocks:** Hardware-level checks for glass presence and concurrent flow prevention.
 
@@ -15,24 +15,35 @@
 ## Tech Stack
 | Component | Technology |
 | :--- | :--- |
-| **Frontend** | HTML5, Vanilla CSS, JavaScript (ES6+) |
-| **Backend** | Python 3.x, Flask |
+| **Frontend** | React 19, Vite 7, TypeScript 5.9, Tailwind CSS v4, shadcn/ui |
+| **Backend** | Python 3.13+, Flask |
 | **Database** | SQLite3 |
 | **Hardware** | ESP32 (Micro-controller) |
-| **Icons/Fonts** | Google Fonts (Outfit), Custom SVGs |
-| **Scanning** | html5-qrcode Library |
+| **Icons** | Lucide React |
+| **Scanning** | html5-qrcode |
 
 ---
 
 ## Project Structure
 ```text
-aztec-pour/
-├── app.py             # Flask application factory
-├── routes.py          # API blueprint, route handlers & response helpers
-├── esp32.py           # ESP32 hardware communication layer
-├── database.py        # SQLite schema and data access layer
-├── index.html         # Unified frontend application
-└── README.md          # This documentation
+chuggernog/
+├── backend/
+│   ├── app.py           # Flask application factory
+│   ├── routes.py        # API blueprint & route handlers
+│   ├── esp32.py         # ESP32 hardware communication layer
+│   ├── database.py      # SQLite schema and data access layer
+│   └── pyproject.toml   # Python dependencies (uv)
+├── frontend/
+│   ├── src/
+│   │   ├── components/  # React components (shadcn/ui + custom)
+│   │   ├── hooks/       # Custom hooks (useStatus, useLogs, useDispense)
+│   │   ├── lib/         # API client, constants, utilities
+│   │   ├── types/       # TypeScript interfaces
+│   │   ├── App.tsx      # Root application component
+│   │   └── main.tsx     # Entry point
+│   ├── package.json
+│   └── vite.config.ts   # Vite config with API proxy
+└── README.md
 ```
 
 ---
@@ -44,7 +55,6 @@ The server acts as a proxy/logger between the frontend and the ESP32.
 
 | Endpoint | Method | Description |
 | :--- | :--- | :--- |
-| `/` | `GET` | Serves the main web interface. |
 | `/api/status` | `GET` | Returns connectivity status for both Server and ESP32. |
 | `/api/dispense` | `POST` | Initiates a pour order. Requires `{ "amount_ml": int, "user_token": str }`. |
 | `/api/logs` | `GET` | Retrieves the latest `n` activity records from the database. |
@@ -75,22 +85,44 @@ CREATE TABLE events (
 
 ### Prerequisites
 - **Python 3.13+**
+- **Node.js 18+** and **npm**
 - **[uv](https://docs.astral.sh/uv/getting-started/installation/)** — Python package manager
 
-### 1. Backend Setup
+### 1. Backend
 ```bash
+cd backend
+
 # Install dependencies (automatically creates a .venv)
 uv sync
 
 # Launch server (database is initialized automatically)
 uv run flask run --host 0.0.0.0 --port 5000
 ```
-*Note: Ensure `ESP32_URL` in `app.py` matches your hardware's local IP or mDNS name.*
 
-### 2. Hardware Configuration
+### 2. Frontend
+```bash
+cd frontend
+
+# Install dependencies
+npm install
+
+# Start dev server (proxies /api/* to Flask on port 5000)
+npm run dev
+```
+
+The Vite dev server starts on `http://localhost:5173` and automatically proxies all `/api/*` requests to the Flask backend on port 5000.
+
+#### Production Build
+```bash
+npm run build    # outputs to frontend/dist/
+npm run preview  # preview the production build locally
+```
+
+### 3. Hardware Configuration
 - Flash ESP32 with an HTTP-responsive firmware.
 - Connect a submersible pump/solenoid and an IR/Ultrasonic proximity sensor for glass detection.
 - Ensure the ESP32 is on the same local network as the Flask server.
+- Update `ESP32_URL` in `backend/esp32.py` if your device is not reachable at `http://esp32.local`.
 
 ---
 
