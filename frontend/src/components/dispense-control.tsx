@@ -102,11 +102,11 @@ export function DispenseControl({
             <button
               type="button"
               onClick={() => setScannerOpen((o) => !o)}
-              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-primary transition-colors hover:bg-muted"
+              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-primary transition-colors hover:bg-muted hover:text-primary-foreground"
               title="Scan QR Code"
               aria-label="Scan QR code"
             >
-              <ScanLine className="size-4" />
+              <ScanLine className="size-4 animate-pulse opacity-80" />
             </button>
           </div>
 
@@ -157,32 +157,35 @@ export function DispenseControl({
             </div>
 
             {/* Custom Volume Input */}
-            <div className="flex items-center gap-0 rounded-lg bg-muted">
+            <div className="relative flex items-center rounded-lg bg-muted shadow-inner">
               <Input
                 type="number"
                 inputMode="numeric"
                 value={customMl}
                 onChange={(e) => handleCustomChange(e.target.value)}
                 placeholder="Custom Volume"
-                className="border-0 bg-transparent shadow-none focus-visible:ring-0"
+                className="border-0 bg-transparent pr-12 shadow-none focus-visible:ring-0"
                 min={1}
                 max={MAX_DISPENSE_ML}
               />
-              <span className="pr-3 text-sm font-semibold text-muted-foreground">ML</span>
+              <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-foreground/70">
+                ML
+              </span>
             </div>
           </div>
 
-          {/* Dispense Button */}
           <Button
             type="submit"
             disabled={!isReady}
             size="lg"
             className={cn(
-              "w-full text-sm font-bold uppercase tracking-wider",
-              isErrorButton && "border border-destructive/20 bg-destructive/15 text-destructive hover:bg-destructive/20",
+              "w-full text-sm font-bold uppercase tracking-wider transition-all duration-300",
+              isErrorButton && "border border-destructive/30 bg-destructive/10 text-destructive hover:bg-destructive/20",
+              !status.esp_online && "opacity-60 grayscale cursor-not-allowed",
+              (dispenseState === "pouring" || dispenseState === "requesting") && "animate-pulse shadow-[0_0_15px_rgba(var(--color-primary-rgb),0.5)] bg-primary border border-primary/50 text-primary-foreground",
             )}
           >
-            <GlassWater className="mr-2 size-4" />
+            <GlassWater className={cn("mr-2 size-4", (dispenseState === "pouring" && "animate-bounce"))} />
             {getButtonLabel()}
           </Button>
         </form>

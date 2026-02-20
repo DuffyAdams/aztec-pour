@@ -1,31 +1,31 @@
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { StatusIndicator } from "@/components/status-indicator";
+import { cn } from "@/lib/utils";
 import type { SystemStatus } from "@/types/api";
 
 interface StatusCardProps {
   status: SystemStatus;
-  lastUpdated: Date | null;
 }
 
-function formatTime(date: Date | null): string {
-  if (!date) return "--:--:--";
-  return date.toLocaleTimeString();
-}
+
 
 function StatusRow({
   label,
   value,
   indicator,
+  valueClassName,
 }: {
   label: string;
   value: string;
   indicator?: "online" | "offline" | "busy";
+  valueClassName?: string;
 }) {
   return (
     <div className="flex items-center justify-between py-3">
       <span className="text-sm text-foreground">{label}</span>
-      <span className="flex items-center gap-2 text-sm text-muted-foreground tabular-nums">
+      <span className={cn("flex items-center gap-2 text-sm text-muted-foreground tabular-nums", valueClassName)}>
         {indicator && <StatusIndicator status={indicator} />}
         {value}
       </span>
@@ -33,7 +33,14 @@ function StatusRow({
   );
 }
 
-export function StatusCard({ status, lastUpdated }: StatusCardProps) {
+export function StatusCard({ status }: StatusCardProps) {
+  const [time, setTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
   const espState = status.esp_status.state;
   const isPouring = espState === "pouring" || status.is_pouring;
 
@@ -42,13 +49,21 @@ export function StatusCard({ status, lastUpdated }: StatusCardProps) {
 
   return (
     <Card>
-      <CardHeader className="flex-row items-center justify-between space-y-0 pb-2">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
         <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           System Status
         </CardTitle>
-        <span className="text-[0.7rem] text-muted-foreground tabular-nums">
-          {formatTime(lastUpdated)}
-        </span>
+        <div className="flex items-center gap-2 tabular-nums">
+          <span className="text-[0.85rem] font-bold tracking-tight text-white dark:text-primary">
+            {time.toLocaleTimeString("en-US", {
+              hour12: false,
+              timeZone: "America/Los_Angeles"
+            })}
+          </span>
+          <span className="text-[0.55rem] font-bold uppercase tracking-tight opacity-40">
+            PST
+          </span>
+        </div>
       </CardHeader>
 
       <CardContent className="space-y-0 rounded-lg bg-muted/30 px-4">
@@ -56,6 +71,7 @@ export function StatusCard({ status, lastUpdated }: StatusCardProps) {
           label="Connectivity"
           value={status.esp_online ? "Online" : "Offline"}
           indicator={status.esp_online ? "online" : "offline"}
+          valueClassName={!status.esp_online ? "text-destructive font-medium" : undefined}
         />
         <Separator className="opacity-10" />
         <StatusRow
@@ -68,8 +84,9 @@ export function StatusCard({ status, lastUpdated }: StatusCardProps) {
           label="Machine State"
           value={machineStateLabel}
           indicator={machineIndicator}
+          valueClassName={isPouring ? "text-primary font-bold animate-pulse" : undefined}
         />
       </CardContent>
-    </Card>
+    </Card >
   );
 }

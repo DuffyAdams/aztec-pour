@@ -26,7 +26,6 @@ const INITIAL_STATUS: SystemStatus = {
 export function useStatus() {
   const [status, setStatus] = useState<SystemStatus>(INITIAL_STATUS);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  const intervalRef = useRef<ReturnType<typeof setInterval>>(null);
   const onlineRef = useRef(false);
   const hasFetched = useRef(false);
 
@@ -54,24 +53,19 @@ export function useStatus() {
   }
 
   useEffect(() => {
-    function scheduleInterval() {
-      if (intervalRef.current) clearInterval(intervalRef.current);
+    let timeoutId: ReturnType<typeof setTimeout>;
+
+    async function poll() {
+      await refresh();
       const interval = onlineRef.current ? POLL_STATUS_MS : POLL_STATUS_OFFLINE_MS;
-      intervalRef.current = setInterval(() => {
-        refresh().then(() => {
-          // Re-schedule if the online state changed (interval needs updating)
-          const newInterval = onlineRef.current ? POLL_STATUS_MS : POLL_STATUS_OFFLINE_MS;
-          if (newInterval !== interval) {
-            scheduleInterval();
-          }
-        });
-      }, interval);
+      timeoutId = setTimeout(poll, interval);
     }
 
-    scheduleInterval();
+    // Start polling
+    timeoutId = setTimeout(poll, onlineRef.current ? POLL_STATUS_MS : POLL_STATUS_OFFLINE_MS);
 
     return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
+      clearTimeout(timeoutId);
     };
   }, [refresh]);
 

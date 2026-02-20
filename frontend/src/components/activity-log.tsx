@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { LogEntry } from "@/types/api";
+import { Activity } from "lucide-react";
 
 interface ActivityLogProps {
   logs: LogEntry[];
@@ -49,9 +50,13 @@ export function ActivityLog({ logs }: ActivityLogProps) {
 
       <CardContent>
         {logs.length === 0 ? (
-          <p className="py-6 text-center text-sm text-muted-foreground">
-            No recent activity
-          </p>
+          <div className="flex flex-col items-center justify-center py-8 text-center text-muted-foreground">
+            <Activity className="mb-3 size-8 opacity-20" />
+            <p className="text-sm font-medium">No Recent Dispenses</p>
+            <p className="mt-1 text-xs opacity-60">
+              Activity logs will appear here once pouring begins.
+            </p>
+          </div>
         ) : (
           <ScrollArea className="max-h-60">
             <div className="space-y-0">
