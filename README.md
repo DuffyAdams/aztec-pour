@@ -1,7 +1,7 @@
 # Chuggernog | Technical Documentation
 
 ## System Overview
-**Chuggernog** is a smart drink dispenser control system designed for high-performance party environments (LMAO). It features a distributed architecture where a centralized Python/Flask server coordinates communication between a modern web interface and an ESP32-powered hardware dispenser.
+**Chuggernog** is a smart drink dispenser control system designed for high-performance party environments. It features a distributed architecture where a centralized Python/Flask server coordinates communication between a modern web interface and an ESP32-powered hardware dispenser.
 
 ### Core Features
 - **Real-time Monitoring:** Synchronized status updates for glass presence and machine state.
